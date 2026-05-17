@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ផ្នែកលក់ទំនិញ | KH POS</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #3b82f6;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
+            --danger: #f43f5e;
+        }
+
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', 'Kantumruy Pro', sans-serif; 
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding-bottom: 120px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 25px; }
+
+        .header-row { margin-bottom: 30px; }
+        .header-row h1 { font-size: 2.2rem; font-weight: 800; margin: 0; }
+
+        .terminal-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* --- GLASS FORM CARD --- */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .search-box { position: relative; margin-bottom: 25px; }
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .search-box input:focus { outline: none; border-color: var(--accent); background: rgba(255, 255, 255, 0.1); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
+
+        .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        label { font-weight: 700; font-size: 0.9rem; color: var(--text-sub); text-transform: uppercase; }
+
+        select, input[type="number"] {
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.5);
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .btn-add {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+        .btn-add:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3); }
+
+        /* --- DIGITAL RECEIPT --- */
+        .receipt-card {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            position: sticky;
+            top: 25px;
+        }
+
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed var(--border);
+            margin-bottom: 20px;
+        }
+
+        .receipt-items { max-height: 300px; overflow-y: auto; margin-bottom: 25px; }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .item-info { display: flex; flex-direction: column; }
+        .item-name { font-weight: 600; font-size: 0.95rem; }
+        .item-meta { font-size: 0.8rem; color: var(--text-sub); }
+        .item-price { font-weight: 700; color: var(--accent); }
+
+        /* --- PAYMENT OPTIONS --- */
+        .pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .pay-opt {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .pay-opt.active { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+        .pay-opt input { display: none; }
+
+        .total-box {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .total-amount { font-size: 1.8rem; font-weight: 800; color: #fff; }
+
+        .btn-checkout {
+            background: var(--success);
+            color: white;
+            text-decoration: none;
+            padding: 18px;
+            border-radius: 15px;
+            display: block;
+            text-align: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        /* --- DOCK NAV --- */
+        .dock-nav {
+            position: fixed;
+            bottom: 25px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 8px 16px; border-radius: 20px;
+            display: flex; align-items: center; gap: 10px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            z-index: 1000;
+        }
+        .dock-btn {
+            text-decoration: none; color: var(--text-sub);
+            padding: 10px 15px; border-radius: 15px;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            font-size: 0.7rem; font-weight: 700;
+        }
+        .dock-btn.active { color: #fff; background: rgba(255, 255, 255, 0.1); }
+        .logout-btn { background: none; border: none; color: var(--danger); cursor: pointer; padding: 10px; font-size: 1.2rem; }
+
+        @media (max-width: 950px) {
+            .terminal-grid { grid-template-columns: 1fr; }
+            .receipt-card { position: static; }
+            .dock-nav { width: 90%; justify-content: space-around; }
+        }
+
+
+
+        /* --- MODERN NAVIGATION DOCK --- */
+.dock-nav {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.85); /* Deep Navy ថ្លា */
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    padding: 10px 20px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+}
+
+.dock-btn {
+    text-decoration: none;
+    color: var(--text-sub);
+    padding: 10px 18px;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 65px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover Effect */
+.dock-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-5px);
+}
+
+/* Active State */
+.dock-btn.active {
+    color: #fff;
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+.dock-btn i {
+    font-size: 1.3rem;
+    font-style: normal;
+    margin-bottom: 2px;
+}
+
+/* Divider Line */
+.dock-divider {
+    width: 1px;
+    height: 30px;
+    background: linear-gradient(to bottom, transparent, var(--border), transparent);
+    margin: 0 10px;
+}
+
+/* Logout Styling */
+.logout-form { margin: 0; }
+.logout-btn {
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    padding: 12px;
+    border-radius: 18px;
+    cursor: pointer;
+    color: var(--danger);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: var(--danger);
+    color: white;
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 5px 15px rgba(244, 63, 94, 0.4);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 500px) {
+    .dock-nav {
+        width: 95%;
+        padding: 8px;
+        gap: 2px;
+    }
+    .dock-btn {
+        padding: 8px;
+        min-width: 55px;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header-row">
+            <h1>ផ្នែកលក់ទំនិញ</h1>
+        </header>
+
+        <div class="terminal-grid">
+            <div class="glass-card">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="liveSearchInput" placeholder="ស្វែងរកទំនិញ..." onkeyup="filterItems()">
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-height: 70vh; overflow-y: auto; padding: 10px;">
+            {% for product in products %}
+            <form method="POST" style="margin:0;">
+                {% csrf_token %}
+                <input type="hidden" name="product" value="{{ product.id }}">
+                <input type="hidden" name="quantity" value="1">
+                
+                <button type="submit" style="width: 100%; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 10px; cursor: pointer; color: white; transition: 0.3s; text-align: center;">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 12px;">
+                    {% else %}
+                        <div style="height: 140px; display: grid; place-items: center; background: rgba(255,255,255,0.05); border-radius: 15px; margin-bottom: 12px; font-size: 2.5rem;">📦</div>
+                    {% endif %}
+                    
+                    <div style="font-weight: 700; font-size: 1rem; margin-bottom: 4px;">{{ product.name }}</div>
+                    <div style="color: var(--accent); font-weight: 800; font-size: 1.1rem;">${{ product.price }}</div>
+                    
+                    <div style="margin-top: 5px; font-size: 0.8rem;">
+                        {% if product.stock <= 5 %}
+                            <span style="color: #f43f5e; background: rgba(244, 63, 94, 0.1); padding: 2px 8px; border-radius: 10px; font-weight: 700;">
+                                ជិតអស់ ({{ product.stock }})
+                            </span>
+                        {% else %}
+                            <span style="color: var(--text-sub);">ស្តុក: {{ product.stock }}</span>
+                        {% endif %}
+                    </div>
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+            </div>
+
+<div class="receipt-card">
+    <div class="receipt-header">
+        <span style="font-weight: 800;">វិក្កយបត្រសង្ខេប</span>
+        <span style="color: var(--text-sub);">#{{ items|length }} មុខ</span>
+    </div>
+    
+    <div class="receipt-items">
+        {% for item in items %}
+        <div class="item-row" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <div class="item-info">
+                <span class="item-meta" style="color: var(--accent); font-weight: 700; display: block; font-size: 0.85rem;">
+                    ${{ item.product.price }}
+                </span>
+                <span class="item-name" style="font-weight: 600; font-size: 1rem;">{{ item.product.name }}</span>
+            </div>
+            
+            <div class="qty-controls" style="display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;">
+                <a href="?update={{ item.id }}&action=minus" 
+                   style="padding: 5px 12px; color: white; text-decoration: none; font-weight: bold; border-right: 1px solid var(--border);">−</a>
+                
+                <span style="padding: 0 10px; font-weight: 800; min-width: 25px; text-align: center;">{{ item.quantity }}</span>
+                
+                <a href="?update={{ item.id }}&action=plus" 
+                   style="padding: 5px 12px; color: white; text-decoration: none; font-weight: bold; border-left: 1px solid var(--border);">+</a>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 40px 0; opacity: 0.3;">
+            មិនទាន់មានទំនិញទេ
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="stat-box" style="margin-top: 20px; border-color: var(--accent);">
+        <form action="{% url 'apply_discount' order.pk %}" method="POST" style="display: flex; align-items: center; gap: 10px;">
+            {% csrf_token %}
+            <span class="title" style="min-width: 100px;">បញ្ចុះតម្លៃ ($) :</span>
+            <input type="number" name="discount" value="{{ order.discount_amount }}" 
+                step="0.01" style="background: var(--bg); border: 1px solid var(--border); color: white; padding: 8px; border-radius: 8px; width: 100px;">
+            <button type="submit" class="btn-new" style="padding: 8px 15px;">យល់ព្រម</button>
+        </form>
+    </div>
+
+    <div style="margin-top: 15px; text-align: right;">
+        <p style="color: var(--text-sub); margin: 2px 0;">សរុបដើម: ${{ order.total|add:order.discount_amount|stringformat:".2f" }}</p>
+        <p style="color: var(--danger); margin: 2px 0;">បញ្ចុះតម្លៃ: -${{ order.discount_amount|stringformat:".2f" }}</p>
+        <h2 style="color: var(--success); margin: 5px 0;">ត្រូវបង់សរុប: ${{ order.total|stringformat:".2f" }}</h2>
+    </div>
+
+    <label style="display: block; margin-bottom: 12px;">វិធីសាស្ត្រទូទាត់</label>
+    <div class="pay-grid">
+        <label class="pay-opt active" id="lCash">
+            <input type="radio" name="payment_method" value="cash" checked onclick="setPay('cash')">
+            💵 Cash
+        </label>
+        <label class="pay-opt" id="lQR">
+            <input type="radio" name="payment_method" value="qr" onclick="setPay('qr')">
+            📱 Scan QR
+        </label>
+    </div>
+
+    <div class="total-box">
+        <span style="font-weight: 700; color: var(--text-sub);">សរុបរួម</span>
+        <span class="total-amount">${{ order.total }}</span>
+    </div>
+
+    {% if items %}
+    <a href="/sales/orders/" class="btn-checkout">
+        បង់ប្រាក់ឥឡូវនេះ
+    </a>
+
+    <form action="{% url 'cancel_order' order.pk %}" method="POST" 
+        onsubmit="return confirm('តើអ្នកពិតជាចង់លុបការបញ្ជាទិញនេះមែនទេ?')" style="margin-top: 10px;">
+        {% csrf_token %}
+        <button type="submit" 
+                style="width: 100%; background: rgba(244, 63, 94, 0.1); color: var(--danger); border: 1px solid var(--danger); padding: 12px; border-radius: 15px; font-weight: 700; cursor: pointer;">
+            ❌ បោះបង់ការលក់នេះ
+        </button>
+    </form>
+    {% endif %}
+</div>
+        </div>
+    </div>
+
+    <nav class="dock-nav">
+        <a href="/sales/orders/new/" class="dock-btn active"><i>🛒</i><span>លក់</span></a>
+        <a href="/sales/products/" class="dock-btn"><i>📦</i><span>ទំនិញ</span></a>
+        <a href="/sales/orders/" class="dock-btn"><i>📊</i><span>ប្រវត្តិ</span></a>
+        <div style="width: 1px; height: 24px; background: var(--border); margin: 0 5px;"></div>
+        <form action="{% url 'logout' %}" method="post" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">🚪</button>
+        </form>
+    </nav>
+
+    <script>
+        function filterItems() {
+            let filter = document.getElementById('liveSearchInput').value.toLowerCase();
+            let options = document.querySelector('select[name="product"]').options;
+            for (let opt of options) {
+                opt.style.display = opt.text.toLowerCase().includes(filter) ? "" : "none";
+            }
+        }
+
+        function setPay(method) {
+            document.getElementById('lCash').classList.toggle('active', method === 'cash');
+            document.getElementById('lQR').classList.toggle('active', method === 'qr');
+        }
+    </script>
+</body>
+</html>

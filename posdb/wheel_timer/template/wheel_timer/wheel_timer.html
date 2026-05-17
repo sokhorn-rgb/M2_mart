@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ចាប់ឈ្មោះមហាសំណាង</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f36 50%, #0f1419 100%);
+            min-height: 100vh;
+            display: flex;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            gap: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: rgba(30, 35, 60, 0.8);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            max-height: 100vh;
+            z-index: 998;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #64b5f6, #42a5f5);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(66, 165, 245, 0.6);
+        }
+
+        .fullscreen-toggle {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #81c784, #66bb6a);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(129, 199, 132, 0.4);
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+
+        .fullscreen-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(129, 199, 132, 0.6);
+        }
+
+        .section {
+            background: transparent;
+            backdrop-filter: none;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+            width: 100%;
+        }
+
+        .timer-section {
+            background: rgba(30, 35, 60, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 100%;
+        }
+
+        .section h1 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #64b5f6, #81c784);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Wheel Section */
+        .wheel-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        #wheelContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+            height: 680px;
+            width: 680px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #wheelContainer:hover canvas {
+            filter: drop-shadow(0 0 40px rgba(100, 181, 246, 0.5));
+            transform: scale(1.02);
+        }
+
+        canvas {
+            filter: drop-shadow(0 0 30px rgba(100, 181, 246, 0.3));
+            display: block;
+            cursor: pointer;
+            width: 680px;
+            height: 680px;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            clip-path: polygon(50% 100%, 15% 35%, 40% 35%, 40% 0%, 60% 0%, 60% 35%, 85% 35%);
+            filter: drop-shadow(0 3px 12px rgba(255, 215, 0, 0.7));
+            z-index: 10;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 120px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        button {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #64b5f6, #42a5f5);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.spin-btn {
+            background: linear-gradient(135deg, #81c784, #66bb6a);
+            padding: 12px 32px;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+
+        .names-list {
+            max-height: 120px;
+            overflow-y: auto;
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .name-tag {
+            background: rgba(100, 181, 246, 0.2);
+            border: 1px solid rgba(100, 181, 246, 0.4);
+            border-radius: 16px;
+            padding: 4px 10px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .name-tag button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            padding: 0;
+            font-size: 16px;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .name-tag button:hover {
+            color: #ff6b6b;
+            transform: none;
+        }
+
+        /* Timer Section */
+        .timer-display {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(100, 181, 246, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .time-value {
+            font-size: 48px;
+            font-weight: 300;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 1px;
+            color: #64b5f6;
+            text-shadow: 0 0 20px rgba(100, 181, 246, 0.4);
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .timer-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .time-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .time-input-group label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: rgba(100, 181, 246, 0.5);
+            background: rgba(100, 181, 246, 0.1);
+        }
+
+        .timer-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        button.timer-btn {
+            flex: 1;
+            min-width: 85px;
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(100, 181, 246, 0.1);
+            border-radius: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        .selected-name {
+            font-size: 28px;
+            font-weight: 600;
+            margin-top: 15px;
+            color: #ffd700;
+            text-align: center;
+        }
+
+        .timer-running {
+            background: rgba(129, 199, 132, 0.2);
+            border-color: rgba(129, 199, 132, 0.5) !important;
+        }
+
+        .timer-warning {
+            background: rgba(255, 152, 0, 0.2);
+            border-color: rgba(255, 152, 0, 0.5) !important;
+        }
+
+        .timer-finished {
+            background: rgba(244, 67, 54, 0.2);
+            border-color: rgba(244, 67, 54, 0.5) !important;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                transform: translateY(100%);
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                max-height: 70vh;
+            }
+
+            .sidebar.active {
+                transform: translateY(0);
+            }
+
+            .sidebar-toggle {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            #wheelContainer {
+                height: 400px;
+                width: 400px;
+            }
+
+            canvas {
+                width: 400px;
+                height: 400px;
+            }
+
+            .time-value {
+                font-size: 56px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            #wheelContainer {
+                height: 300px;
+                width: 300px;
+            }
+
+            canvas {
+                width: 300px;
+                height: 300px;
+            }
+
+            .wheel-section h1 {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(100, 181, 246, 0.3);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 181, 246, 0.5);
+        }
+
+        .names-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .names-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .names-list::-webkit-scrollbar-thumb {
+            background: rgba(100, 181, 246, 0.3);
+            border-radius: 3px;
+        }
+
+        .names-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 181, 246, 0.5);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(30, 35, 60, 0.95), rgba(20, 25, 45, 0.95));
+            border: 2px solid rgba(100, 181, 246, 0.4);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 550px;
+            width: 95%;
+            box-shadow: 0 0 60px rgba(100, 181, 246, 0.3), 0 0 120px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .modal-name {
+            font-size: 56px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 25px 0;
+            letter-spacing: 2px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .modal-options {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(100, 181, 246, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(100, 181, 246, 0.2);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .modal-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #81c784, #66bb6a);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(129, 199, 132, 0.4);
+        }
+
+        .modal-btn-secondary {
+            background: linear-gradient(135deg, #64b5f6, #42a5f5);
+            color: white;
+        }
+
+        .modal-btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
+        }
+
+        .modal-btn-danger {
+            background: rgba(244, 67, 54, 0.8);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: white;
+        }
+
+        .modal-btn-danger:hover {
+            background: rgba(244, 67, 54, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+        }
+
+        .modal-countdown {
+            font-size: 48px;
+            font-weight: 300;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 3px;
+            color: #81c784;
+            text-shadow: 0 0 15px rgba(129, 199, 132, 0.4);
+            font-family: 'Monaco', 'Courier New', monospace;
+            margin: 20px 0;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Content - Wheel -->
+        <div class="main-content">
+            <div class="wheel-section">
+                <h1 style="margin-bottom: 30px;">🎡 កម្មវិធីចាប់ឈ្មោះមហាសំណាង</h1>
+                
+                <div id="wheelContainer">
+                    <div class="wheel-pointer"></div>
+                    <canvas id="wheelCanvas" width="680" height="680"></canvas>
+                </div>
+
+                <div class="selected-name" id="selectedName" style="text-align: center; margin-top: 30px;"></div>
+            </div>
+        </div>
+
+        <!-- Sidebar - Timer & Names -->
+        <div class="sidebar" id="sidebar">
+            <div class="timer-section">
+                <h1>👥 បញ្ជីឈ្មោះ</h1>
+
+                <div class="controls" style="margin-bottom: 15px;">
+                    <input type="text" id="nameInput" placeholder="Enter name..." style="flex: 1;">
+                    <button onclick="addName()">បន្ថែម</button>
+                </div>
+
+                <div class="names-list" id="namesList" style="margin-bottom: 15px; max-height: 120px;"></div>
+
+                <hr style="border: 1px solid rgba(255, 255, 255, 0.1); margin: 15px 0;">
+
+                <h1>⏱️ ម៉ោងកំណត់</h1>
+
+                <div class="timer-display" id="timerDisplay">
+                    <div class="time-value" id="timeDisplay">00:00:00</div>
+                </div>
+
+                <div class="timer-inputs">
+                    <div class="time-input-group">
+                        <label>ម៉ោង</label>
+                        <input type="number" id="hoursInput" min="0" max="23" value="0">
+                    </div>
+                    <div class="time-input-group">
+                        <label>នាទី</label>
+                        <input type="number" id="minutesInput" min="0" max="59" value="5">
+                    </div>
+                    <div class="time-input-group">
+                        <label>វិនាទី</label>
+                        <input type="number" id="secondsInput" min="0" max="59" value="0">
+                    </div>
+                </div>
+
+                <div class="timer-buttons">
+                    <button class="timer-btn" onclick="startTimer()">ចាប់ផ្ដើម</button>
+                    <button class="timer-btn secondary" onclick="pauseTimer()">ផ្អាក</button>
+                    <button class="timer-btn secondary" onclick="resetTimer()">កំណត់ឡើងវិញ</button>
+                </div>
+
+                <div class="status" id="timerStatus">ចាប់ផ្ដើម</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Timer">⏱️</button>
+
+    <!-- Fullscreen Toggle Button -->
+    <button class="fullscreen-toggle" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
+
+    <!-- Selection Modal -->
+    <div class="modal" id="selectionModal">
+        <div class="modal-content">
+            <div class="modal-title">អ្នកមានសំណាងនោះគឺ</div>
+            <div class="modal-name" id="modalName"></div>
+            <div class="modal-countdown" id="modalCountdown">00:00:00</div>
+            <div class="modal-options">
+                <p style="font-size: 13px; color: rgba(255, 255, 255, 0.6); margin-bottom: 15px;">កំពុងរាប់ថយក្រោយ...</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-danger" onclick="removeAndContinue()">ដកឈ្មោះចេញ</button>
+                </div>
+                <button class="modal-btn modal-btn-secondary" style="width: 100%; margin-top: 10px;" onclick="closeModal()">បិទ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== SOUND ENGINE ====================
+        class SoundEngine {
+            constructor() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            playBeep(frequency = 800, duration = 100) {
+                const now = this.audioContext.currentTime;
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(this.audioContext.destination);
+
+                osc.frequency.value = frequency;
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration / 1000);
+
+                osc.start(now);
+                osc.stop(now + duration / 1000);
+            }
+
+            playSuccess() {
+                this.playBeep(800, 150);
+                setTimeout(() => this.playBeep(1000, 150), 100);
+            }
+
+            playTick() {
+                this.playBeep(600, 50);
+            }
+
+            playAlarm() {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => this.playBeep(1200, 200), i * 250);
+                }
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        // ==================== WHEEL LOGIC ====================
+        let names = [];
+        let wheelRotation = 0;
+        let isSpinning = false;
+        let selectedName = '';
+
+        function renderWheel() {
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 290;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (names.length === 0) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.font = '18px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('បញ្ចូលឈ្មោះអ្នកដែលមានសំណាងដើម្បីបង្វិល', centerX, centerY);
+                return;
+            }
+
+            const sliceAngle = (Math.PI * 2) / names.length;
+            const colors = [
+                '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A',
+                '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
+            ];
+
+            names.forEach((name, idx) => {
+                const startAngle = wheelRotation + idx * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                // Draw slice
+                ctx.fillStyle = colors[idx % colors.length];
+                ctx.globalAlpha = 0.8;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw border
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw text
+                const textAngle = startAngle + sliceAngle / 2;
+                const textX = centerX + Math.cos(textAngle) * (radius * 0.95);
+                const textY = centerY + Math.sin(textAngle) * (radius * 0.95);
+
+                ctx.save();
+                ctx.translate(textX, textY);
+                ctx.rotate(textAngle);
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 22px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(name, 0, 0);
+                ctx.restore();
+
+                ctx.globalAlpha = 1;
+            });
+
+            // Draw center circle
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function addName() {
+            const input = document.getElementById('nameInput');
+            const name = input.value.trim();
+            if (name) {
+                names.push(name);
+                input.value = '';
+                updateNamesList();
+                renderWheel();
+                sound.playBeep();
+            }
+        }
+
+        function removeName(idx) {
+            names.splice(idx, 1);
+            updateNamesList();
+            renderWheel();
+            sound.playBeep(600, 100);
+        }
+
+        function updateNamesList() {
+            const list = document.getElementById('namesList');
+            list.innerHTML = names.map((name, idx) =>
+                `<div class="name-tag">${name}<button onclick="removeName(${idx})">×</button></div>`
+            ).join('');
+        }
+
+        function spinWheel() {
+            if (isSpinning || names.length === 0) return;
+
+            isSpinning = true;
+            sound.playBeep(400, 100);
+
+            const spins = 8 + Math.random() * 4;
+            const finalRotation = spins * Math.PI * 2 + Math.random() * Math.PI * 2;
+            const duration = 4000;
+            const startTime = Date.now();
+            const startRotation = wheelRotation;
+
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Easing function: cubic ease-out
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+                wheelRotation = startRotation + finalRotation * easeProgress;
+                renderWheel();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    wheelRotation = wheelRotation % (Math.PI * 2);
+                    renderWheel();
+
+                    // Determine selected name (pointer at top = 3π/2)
+                    const sliceAngle = (Math.PI * 2) / names.length;
+                    const pointerAngle = 3 * Math.PI / 2; // Top of wheel
+                    const normalizedRotation = wheelRotation % (Math.PI * 2);
+                    let selectedIdx = Math.floor((pointerAngle - normalizedRotation) / sliceAngle);
+                    selectedIdx = ((selectedIdx % names.length) + names.length) % names.length;
+                    selectedName = names[selectedIdx];
+
+                    document.getElementById('selectedName').textContent = selectedName;
+                    document.getElementById('modalName').textContent = selectedName;
+                    sound.playSuccess();
+                    isSpinning = false;
+                    showModalAndStartTimer();
+                }
+            }
+
+            animate();
+        }
+
+        // ==================== TIMER LOGIC ====================
+        let timerInterval = null;
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+        let isTimerRunning = false;
+
+        function updateTimeDisplay() {
+            const hours = Math.floor(remainingSeconds / 3600);
+            const minutes = Math.floor((remainingSeconds % 3600) / 60);
+            const seconds = remainingSeconds % 60;
+
+            const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timeDisplay').textContent = timeStr;
+
+            const display = document.getElementById('timerDisplay');
+            display.classList.remove('timer-running', 'timer-warning', 'timer-finished');
+
+            if (remainingSeconds === 0 && totalSeconds > 0) {
+                display.classList.add('timer-finished');
+                document.getElementById('timerStatus').textContent = 'Finished!';
+            } else if (remainingSeconds < 60 && remainingSeconds > 0) {
+                display.classList.add('timer-warning');
+            } else if (isTimerRunning) {
+                display.classList.add('timer-running');
+            }
+        }
+
+        function startTimer() {
+            if (isTimerRunning) return;
+
+            if (remainingSeconds === 0) {
+                const hours = parseInt(document.getElementById('hoursInput').value) || 0;
+                const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+                const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+                totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                remainingSeconds = totalSeconds;
+            }
+
+            if (remainingSeconds <= 0) return;
+
+            isTimerRunning = true;
+            document.getElementById('timerStatus').textContent = 'កំពុងដំណើការ...';
+
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                updateTimeDisplay();
+                sound.playTick();
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    sound.playAlarm();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                document.getElementById('timerStatus').textContent = 'ផ្អាក';
+            }
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            remainingSeconds = 0;
+            updateTimeDisplay();
+            document.getElementById('timerStatus').textContent = 'ចាប់ផ្ដើម';
+        }
+
+        // ==================== MODAL FUNCTIONS ====================
+        let modalTimerInterval = null;
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        function toggleFullscreen() {
+            const elem = document.documentElement;
+            if (!document.fullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        function showModal() {
+            document.getElementById('selectionModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('selectionModal').classList.remove('active');
+            if (modalTimerInterval) {
+                clearInterval(modalTimerInterval);
+            }
+        }
+
+        function showModalAndStartTimer() {
+            // Always read fresh timer values
+            const hours = parseInt(document.getElementById('hoursInput').value) || 0;
+            const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+            const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+            totalSeconds = hours * 3600 + minutes * 60 + seconds;
+            remainingSeconds = totalSeconds;
+
+            showModal();
+            updateModalCountdown();
+            isTimerRunning = true;
+
+            // Start modal countdown
+            modalTimerInterval = setInterval(() => {
+                remainingSeconds--;
+                updateTimeDisplay();
+                updateModalCountdown();
+                sound.playTick();
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(modalTimerInterval);
+                    isTimerRunning = false;
+                    sound.playAlarm();
+                }
+            }, 1000);
+        }
+
+        function updateModalCountdown() {
+            const hours = Math.floor(remainingSeconds / 3600);
+            const minutes = Math.floor((remainingSeconds % 3600) / 60);
+            const seconds = remainingSeconds % 60;
+            const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('modalCountdown').textContent = timeStr;
+        }
+
+        function removeAndContinue() {
+            const selectedIdx = names.findIndex(n => n === selectedName);
+            if (selectedIdx > -1) {
+                removeName(selectedIdx);
+            }
+            closeModal();
+            resetTimer();
+        }
+
+        // Close modal on background click
+        document.getElementById('selectionModal').addEventListener('click', (e) => {
+            if (e.target.id === 'selectionModal') {
+                closeModal();
+            }
+        });
+
+        // Handle paste from Excel (multiple rows and columns)
+        document.getElementById('nameInput').addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            
+            // Split by newlines for rows
+            const rows = pastedText.trim().split(/\n/);
+            
+            rows.forEach(row => {
+                // Split by tabs for columns
+                const columns = row.trim().split(/\t/);
+                // Join columns with space and filter empty strings
+                const name = columns.filter(c => c.trim()).join(' ').trim();
+                
+                if (name) {
+                    names.push(name);
+                }
+            });
+            
+            if (rows.some(r => r.trim())) {
+                updateNamesList();
+                renderWheel();
+                sound.playBeep();
+                document.getElementById('nameInput').value = '';
+            }
+        });
+
+        // Initialize
+        document.getElementById('nameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addName();
+        });
+
+        updateNamesList();
+        renderWheel();
+        updateTimeDisplay();
+
+        // Add click handler to wheel center for spinning
+        document.getElementById('wheelContainer').addEventListener('click', (e) => {
+            const rect = document.getElementById('wheelCanvas').getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const clickX = e.clientX;
+            const clickY = e.clientY;
+            
+            const distance = Math.sqrt((clickX - centerX) ** 2 + (clickY - centerY) ** 2);
+            const centerRadius = 25;
+            
+            if (distance < centerRadius * 3) {
+                spinWheel();
+            }
+        });
+    </script>
+
+    <!-- Footer Copyright -->
+    <div class="footer">© chanthavrak@2026</div>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ប្រវត្តិនៃការលក់ | KH POS</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0f172a; /* Deep Navy Background */
+            --card-bg: rgba(30, 41, 59, 0.7); /* Slate with Transparency */
+            --accent: #3b82f6;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
+            --danger: #f43f5e;
+            --warning: #f59e0b;
+        }
+
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', 'Kantumruy Pro', sans-serif; 
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding-bottom: 120px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 25px; }
+
+        /* --- HEADER SECTION --- */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .header-row h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-print {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-print:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* --- FROSTED TABLE CONTAINER --- */
+        .glass-table-wrapper {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px 25px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sub);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        .order-id {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .cashier-name { font-weight: 600; }
+
+        .timestamp {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        /* --- STATUS BADGES --- */
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 8px;
+            text-transform: uppercase;
+        }
+
+        .status-paid { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .status-unpaid { background: rgba(244, 63, 94, 0.1); color: var(--danger); }
+
+        .total-amount {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        /* --- NAVIGATION DOCK --- */
+        .dock-nav {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            z-index: 1000;
+        }
+
+        .dock-btn {
+            text-decoration: none;
+            color: var(--text-sub);
+            padding: 10px 15px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .dock-btn.active { color: #fff; background: rgba(255, 255, 255, 0.1); }
+        .dock-btn i { font-size: 1.2rem; font-style: normal; }
+
+        .logout-btn {
+            background: none; border: none; padding: 10px; cursor: pointer;
+            color: var(--danger); font-size: 1.2rem;
+        }
+
+        /* --- PRINT STYLES --- */
+        @media print {
+            body { background: white !important; color: black !important; }
+            .dock-nav, .btn-print { display: none !important; }
+            .container { max-width: 100%; padding: 0; }
+            .glass-table-wrapper { background: white !important; border: 1px solid #ddd !important; box-shadow: none !important; }
+            th { color: black !important; border-bottom: 2px solid black !important; }
+            td { color: black !important; border-bottom: 1px solid #ddd !important; }
+            .order-id, .total-amount { color: black !important; }
+        }
+
+        @media (max-width: 768px) {
+            .header-row { flex-direction: column; align-items: flex-start; gap: 15px; }
+            th:nth-child(2), td:nth-child(2) { display: none; } /* Hide cashier on mobile */
+            .dock-nav { width: 90%; justify-content: space-around; }
+        }
+
+        /* --- MODERN NAVIGATION DOCK --- */
+.dock-nav {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.85); /* Deep Navy ថ្លា */
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    padding: 10px 20px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+}
+
+.dock-btn {
+    text-decoration: none;
+    color: var(--text-sub);
+    padding: 10px 18px;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 65px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover Effect */
+.dock-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-5px);
+}
+
+/* Active State */
+.dock-btn.active {
+    color: #fff;
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+.dock-btn i {
+    font-size: 1.3rem;
+    font-style: normal;
+    margin-bottom: 2px;
+}
+
+/* Divider Line */
+.dock-divider {
+    width: 1px;
+    height: 30px;
+    background: linear-gradient(to bottom, transparent, var(--border), transparent);
+    margin: 0 10px;
+}
+
+/* Logout Styling */
+.logout-form { margin: 0; }
+.logout-btn {
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    padding: 12px;
+    border-radius: 18px;
+    cursor: pointer;
+    color: var(--danger);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: var(--danger);
+    color: white;
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 5px 15px rgba(244, 63, 94, 0.4);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 500px) {
+    .dock-nav {
+        width: 95%;
+        padding: 8px;
+        gap: 2px;
+    }
+    .dock-btn {
+        padding: 8px;
+        min-width: 55px;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-row">
+            <h1>ប្រវត្តិនៃការលក់</h1>
+            <button onclick="window.print()" class="btn-print">
+                <span>🖨️</span> បោះពុម្ពរបាយការណ៍
+            </button>
+        </div>
+        
+        <div class="glass-table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>លេខកូដវិក្កយបត្រ</th>
+                        <th>អ្នកគិតលុយ</th>
+                        <th>កាលបរិច្ឆេទ & ម៉ោង</th>
+                        <th>ស្ថានភាព</th>
+                        <th style="text-align: right;">ទឹកប្រាក់សរុប</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td><span class="order-id">#ORD-0{{ order.pk }}</span></td>
+                        <td><span class="cashier-name">{{ order.cashier }}</span></td>
+                        <td><span class="timestamp">{{ order.created_at|date:"d M Y, H:i" }}</span></td>
+                        <td>
+                            {% if order.status|lower == "paid" %}
+                                <span class="status-badge status-paid">Paid</span>
+                            {% elif order.status|lower == "open" %}
+                                <span class="status-badge status-unpaid">Unpaid</span>
+                            {% else %}
+                                <span class="status-badge">{{ order.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;"><span class="total-amount">${{ order.total }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 80px 0; color: var(--text-sub);">
+                            <div style="font-size: 3rem; margin-bottom: 10px; opacity: 0.2;">📊</div>
+                            មិនទាន់មានប្រវត្តិនៃការលក់នៅឡើយទេ
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav class="dock-nav">
+        <a href="/sales/orders/new/" class="dock-btn">
+            <i>🛒</i><span>លក់</span>
+        </a>
+        <a href="/sales/products/" class="dock-btn">
+            <i>📦</i><span>ទំនិញ</span>
+        </a>
+        <a href="/sales/orders/" class="dock-btn active">
+            <i>📊</i><span>ប្រវត្តិ</span>
+        </a>
+        <div style="width: 1px; height: 24px; background: var(--border); margin: 0 5px;"></div>
+        <form action="{% url 'logout' %}" method="post" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">🚪</button>
+        </form>
+    </nav>
+
+</body>
+</html>
