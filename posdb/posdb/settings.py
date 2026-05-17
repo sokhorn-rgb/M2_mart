@@ -121,7 +121,12 @@ STATIC_URL = 'static/'
 
 LOGIN_REDIRECT_URL  = '/sales/products/'   # after login → product catalogue
 LOGOUT_REDIRECT_URL = '/accounts/login/'   # after logout → back to login page
-
+CRSF_TRUSTED_ORIGINS = [
+    'https://sokhorn18.pythonanywhere.com',
+    'http://sokhorn18.pythonanywhere.com'
+]
+SECURE_BROWSER_XSS_FILTER = TRUE
+SECURE_CONTENT_TYPE_NOSNIFF = TURE
 # With these settings + the root RedirectView, the full navigation cycle is:
 #   /  →  /accounts/login/  →  (log in)  →  /sales/products/
 #   (log out)  →  /accounts/login/
