@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-(!qvs_twqgvtp+l+rle#69c6thr+-lohke_j+a8c8)$kbmfd)u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['sokhorn18.pythonanywhere.com ','127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['sokhorn.pythonanywhere.com ','127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -116,19 +116,23 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
-
+  
 STATIC_URL = 'static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR, 'media'  
+
+# With these settings + the root RedirectView, the full navigation cycle is:
+#   /  →  /accounts/login/  →  (log in)  →  /sales/products/
+#   (log out)  →  /accounts/login/
 
 LOGIN_REDIRECT_URL  = '/sales/products/'   # after login → product catalogue
 LOGOUT_REDIRECT_URL = '/accounts/login/'   # after logout → back to login page
 CRSF_TRUSTED_ORIGINS = [
-    'https://sokhorn18.pythonanywhere.com',
-    'http://sokhorn18.pythonanywhere.com'
+    'https://sokhorn.pythonanywhere.com',
+    'http://sokhorn.pythonanywhere.com'
 ]
 SECURE_BROWSER_XSS_FILTER = TRUE
 SECURE_CONTENT_TYPE_NOSNIFF = TURE
-# With these settings + the root RedirectView, the full navigation cycle is:
-#   /  →  /accounts/login/  →  (log in)  →  /sales/products/
-#   (log out)  →  /accounts/login/
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
